@@ -1,3 +1,20 @@
 .title {
   text-align: center;
 }
+
+.body{
+  margin: 10px;
+}
+.row {
+  display: flex;
+  border: 1px grey solid;
+  margin: 10px 0px;
+  justify-content: space-between;
+  padding: 10px;
+
+}
+
+
+.flag {
+  font-size: 120px;
+}
