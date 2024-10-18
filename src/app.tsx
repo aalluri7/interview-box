@@ -28,49 +28,75 @@ Each country should have
 
 */
 type ContryType = {
-  borders: string[],
-  languages: Record<string, string>,
-  currencies: Record<string,
-    { name: string, symbol: string }>,
   name: { common: string, official: string, nativeName: Record<string, { common: string, official: string }> },
   flag: string, population: number, region: string, capital: string[]
 };
 
+type ExtrDataType = {
+  borders: string[] | [],
+  languages?: Record<string, string>,
+  currencies: Record<string,
+    { name: string, symbol: string }>,
+  name: { common: string, official: string, nativeName: Record<string, { common: string, official: string }> },
+}
+
 export const ContryRow = ({ c }: { c: ContryType }) => {
-
   const [more, setMore] = React.useState(false);
-
+  const [extraData, setExtraData] = React.useState<ExtrDataType>()
   const onClick = React.useCallback(() => {
     setMore(!more);
+    if (!more) {
+
+      fetch(`https://restcountries.com/v3.1/name/${c.name.common}?fields=currencies,languages,borders,name`).then(Response => {
+        Response.json().then(data => {
+          console.log({ data })
+          const extra = data.find((country: ExtrDataType) => country.name.official === c.name.official);
+          if (extra) {
+            setExtraData(extra);
+          }
+        })
+      }).catch(error => {
+        console.error(error);
+      })
+    }
   }, [more])
 
+  // const onUpdate =() =>{
+  //   fetch(`https://restcountries.com/v3.1/{}`,{
+  //     method:'POST',
+  //     body:{
+
+  //     }
+  //   })
+  // }
+
+
   let currencies = ''
-  if (c.currencies) {
-    currencies = Object.keys(c.currencies)[0];
+  if (extraData?.currencies) {
+    currencies = Object.keys(extraData.currencies)[0];
   }
   let languages = ''
   let langs = [];
-  if (c.languages) {
-    langs = Object.keys(c.languages);
+  if (extraData?.languages) {
+    langs = Object.keys(extraData.languages);
     languages = langs.join(',');
   }
   let nativeName = ''
-  if (c.name?.nativeName) {
-    const nativeKey = Object.keys(c.name.nativeName)[0];
+  if (extraData?.name?.nativeName) {
+    const nativeKey = Object.keys(extraData.name.nativeName)[0];
     if (nativeKey) {
-      nativeName = c.name?.nativeName[nativeKey].common;
-
+      nativeName = extraData.name?.nativeName[nativeKey].common;
     }
   }
   let borders = ''
-  if (c.borders) {
-    borders = c.borders.join(",")
+  if (extraData?.borders) {
+    borders = extraData.borders.join(",")
   }
 
   return <div className={css.row}>
     <div className={css.info}>
       <div className={more ? css.flag : ''}>{c.flag}</div>
-      <div>name: {c.name.common}</div>
+      <div>Name: {c.name.common}</div>
       <div>Population: {c.population}</div>
       <div>Region: {c.region}</div>
       <div>Capital: {c.capital?.join(',')}</div>
@@ -78,7 +104,7 @@ export const ContryRow = ({ c }: { c: ContryType }) => {
         <div>Native Name:{nativeName}</div>
         <div>Currencies: {currencies}</div>
         <div>Languages: {languages}</div>
-        <div>borders: {borders}</div>
+        <div>Borders: {borders}</div>
       </>)
       }
     </div>
@@ -91,18 +117,29 @@ const ContriesList = () => {
   const [contires, setData] = React.useState<any[]>([]);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filtres, setFiltred] = React.useState<ContryType[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
+  const [errorMessage, setErrorMsg] = React.useState('');
+
+
   React.useEffect(() => {
-    fetch('https://restcountries.com/v3.1/all?fields=borders,region,languages,currencies,name,flag,population,capital').then(response => {
+
+    fetch('https://restcountries.com/v3.1/all?fields=region,name,flag,population,capital').then(response => {
       response.json().then(data => {
         setData(data);
         setFiltred(data);
+        setLoading(false)
       });
+    }).catch(e => {
+      setError(true)
+      setErrorMsg(e.message);
     })
   }, [])
 
   React.useEffect(() => {
     const filtred = contires.filter((c: ContryType) => {
-      if (c.name.common.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()) || searchTerm === '') {
+      const searchKey = `${c.name.common} ${c.name.official} ${c.region}`
+      if (searchKey.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()) || searchTerm === '') {
         return true
       }
     })
@@ -113,11 +150,15 @@ const ContriesList = () => {
     const term = e.target.value;
     setSearchTerm(term);
   }, [searchTerm])
+
+  const searchEmpty = filtres.length === 0;
   return <div className={css.body}>
     Search Contry Name: <input onChange={onChange} value={searchTerm}></input>
-    {filtres.map(c => {
-      return <ContryRow key={c.name.common} c={c} />
-    })}</div>
+    <br />
+    {error ? errorMessage : (loading ? 'loading ....' :
+      searchEmpty ? "no results" : filtres.map(c => {
+        return <ContryRow key={c.name.common} c={c} />
+      }))}</div>
 }
 const router = createBrowserRouter([
   {

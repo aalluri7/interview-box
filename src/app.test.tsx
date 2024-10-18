@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './app';
 import { ContryRow } from './app'
 
@@ -16,12 +16,15 @@ test('renders contry info correctly', () => {
 })
 
 
-test('renders more info on btn click', () => {
+test('renders more info on btn click', async () => {
   render(<ContryRow c={data} />);
   const btn = screen.getByText(/View More/i);
   if (btn) {
     fireEvent.click(btn);
   }
   const CurrenciesElm = screen.getByText(/Currencies/i)
+  await waitFor(() => {
+    expect(CurrenciesElm).toHaveTextContent('NZD')
+  })
   expect(CurrenciesElm).toBeInTheDocument();
 })
