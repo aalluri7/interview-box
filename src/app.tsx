@@ -166,6 +166,11 @@ const router = createBrowserRouter([
     element: <ContriesList />,
     errorElement: <ErrorPage />,
   },
+  {
+    path: "/interview-box",
+    element: <ContriesList />,
+    errorElement: <ErrorPage />,
+  },
 ]);
 
 function App() {
