@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/interview-box/static/css/main.d61d4ff8.css",
+    "main.js": "/interview-box/static/js/main.60ca0801.js",
+    "static/js/453.814332af.chunk.js": "/interview-box/static/js/453.814332af.chunk.js",
+    "index.html": "/interview-box/index.html",
+    "main.d61d4ff8.css.map": "/interview-box/static/css/main.d61d4ff8.css.map",
+    "main.60ca0801.js.map": "/interview-box/static/js/main.60ca0801.js.map",
+    "453.814332af.chunk.js.map": "/interview-box/static/js/453.814332af.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d61d4ff8.css",
+    "static/js/main.60ca0801.js"
+  ]
+}
